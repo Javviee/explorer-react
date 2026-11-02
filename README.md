@@ -13,6 +13,16 @@ Esta es la versión React del proyecto. La versión Vanilla TypeScript se conser
 
 Para esta etapa no se conecta la API ni se usa React Router; los datos son locales.
 
+## Resultado
+
+Modo claro (escritorio, ancho medio: la rejilla pasa a dos columnas):
+
+![Explorer React en modo claro](docs/captura-s24-claro.png)
+
+Modo oscuro automático (escritorio, tres columnas):
+
+![Explorer React en modo oscuro](docs/captura-s24-oscuro.png)
+
 ## Stack
 
 - [React 18](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/)
