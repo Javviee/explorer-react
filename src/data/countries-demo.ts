@@ -40,3 +40,5 @@ export const paisTres: Country = {
   region: 'Asia',
   population: 122650000,
 }
+
+export const countriesDemo: Country[] = [paisUno, paisDos, paisTres]
