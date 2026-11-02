@@ -1,22 +1,21 @@
 import type { JSX } from 'react'
-import { CountryCard } from './components/CountryCard'
-import { paisUno, paisDos, paisTres } from './data/countries-demo'
+import { CountryGrid } from './components/organisms/CountryGrid'
+import { Header } from './components/organisms/Header'
+import { countriesDemo } from './data/countries-demo'
 
 export default function App(): JSX.Element {
+  function handleSelect(code: string): void {
+    // Comprobación temporal: el detalle se conectará con el enrutamiento.
+    console.log('País seleccionado:', code)
+  }
+
   return (
     <main className="min-h-screen px-md py-lg sm:px-lg">
       <div className="mx-auto max-w-6xl">
-        <h1 className="mb-lg font-display text-(length:--font-page-title) text-text-primary dark:text-text-primary-dark">
-          Explorer App
-        </h1>
-        <section
-          aria-label="Países de ejemplo"
-          className="grid grid-cols-1 gap-md sm:grid-cols-2 lg:grid-cols-3"
-        >
-          <CountryCard country={paisUno} />
-          <CountryCard country={paisDos} />
-          <CountryCard country={paisTres} />
-        </section>
+        <Header title="Explora países del mundo">
+          <p>Explorer App: migración de la interfaz a componentes React.</p>
+        </Header>
+        <CountryGrid countries={countriesDemo} onSelect={handleSelect} />
       </div>
     </main>
   )
