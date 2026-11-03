@@ -13,6 +13,10 @@ export default function App(): JSX.Element {
 
   // Resultado derivado: se recalcula en cada render a partir de la colección original.
   const filteredCountries: Country[] = filterCountries(countriesDemo, query, region)
+  // Regiones derivadas de los datos: sin duplicados y en orden alfabético.
+  const regions: string[] = Array.from(
+    new Set(countriesDemo.map((country: Country): string => country.region)),
+  ).sort()
   const hasFilters: boolean = query.trim() !== '' || region !== ''
 
   function handleQueryChange(event: ChangeEvent<HTMLInputElement>): void {
@@ -43,69 +47,16 @@ export default function App(): JSX.Element {
       <SiteHeader />
 
       <main id="inicio" className="mx-auto w-full max-w-6xl flex-1 px-md py-lg sm:px-lg">
-        <Header title="Explora países del mundo">
+        <Header
+          title="Explora países del mundo"
+          query={query}
+          region={region}
+          regions={regions}
+          onQueryChange={handleQueryChange}
+          onRegionChange={handleRegionChange}
+        >
           <p>Busca un país o filtra por región para consultar su información.</p>
         </Header>
-
-        <section
-          aria-label="Filtros de países"
-          className="mb-lg grid gap-md sm:grid-cols-[1fr_14rem] sm:items-end"
-        >
-          <div>
-            <label
-              htmlFor="country-search"
-              className="mb-xs block text-sm font-semibold text-text-primary dark:text-text-primary-dark"
-            >
-              Buscar país
-            </label>
-            <div className="relative">
-              <svg
-                aria-hidden="true"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                className="pointer-events-none absolute left-md top-1/2 h-5 w-5 -translate-y-1/2 text-primary dark:text-text-secondary-dark"
-              >
-                <circle cx="11" cy="11" r="7" />
-                <path d="m21 21-4.3-4.3" strokeLinecap="round" />
-              </svg>
-              <input
-                id="country-search"
-                name="country-search"
-                type="search"
-                autoComplete="off"
-                placeholder="Escribe el nombre de un país"
-                value={query}
-                onChange={handleQueryChange}
-                className="w-full rounded-full border border-border bg-surface py-md pl-12 pr-md font-semibold text-text-primary shadow-sm outline-none transition-colors duration-200 placeholder:font-normal placeholder:text-text-secondary hover:border-primary/50 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/40 dark:border-border-dark dark:bg-surface-dark dark:text-text-primary-dark dark:placeholder:text-text-secondary-dark"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label
-              htmlFor="region-filter"
-              className="mb-xs block text-sm font-semibold text-text-primary dark:text-text-primary-dark"
-            >
-              Filtrar por región
-            </label>
-            <select
-              id="region-filter"
-              name="region-filter"
-              value={region}
-              onChange={handleRegionChange}
-              className="min-h-11 w-full rounded-2xl border border-border bg-primary px-lg py-sm font-semibold text-white outline-none transition-all duration-150 hover:bg-primary/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary dark:border-border-dark"
-            >
-              <option value="">Todas las regiones</option>
-              <option value="Africa">África</option>
-              <option value="Americas">América</option>
-              <option value="Asia">Asia</option>
-              <option value="Europe">Europa</option>
-              <option value="Oceania">Oceanía</option>
-            </select>
-          </div>
-        </section>
 
         <section id="paises" aria-labelledby="countries-title">
           <div className="mb-md flex flex-wrap items-center justify-between gap-sm">
