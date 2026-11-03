@@ -4,7 +4,14 @@ Migración de **Explorer App** a React: interfaz para explorar información de p
 
 Esta es la versión React del proyecto. La versión Vanilla TypeScript se conserva como referencia de la migración: [Explorer-APP---DWA](https://github.com/Javviee/Explorer-APP---DWA) (rama `LAB-2`).
 
-## Estado actual (S26: useState, búsqueda reactiva y filtrado)
+## Estado actual (S27: componentes controlados para búsqueda y filtro)
+
+- Nuevas moléculas `SearchBar` y `RegionFilter`: componentes **controlados** (reciben `value` y `onChange` tipados; no guardan estado).
+- `Header` conserva `title` y `children` y ahora transmite `query`, `region`, `regions` y los callbacks a ambos controles.
+- El estado (`query`, `region`) sigue en `App`, que es el único dueño; las regiones del selector se **derivan** de los datos con `Array.from(new Set(...)).sort()`, y la etiqueta en español se separa del valor (`Americas` → "América").
+- Comportamiento igual que en S26: filtrado derivado, contador, mensaje sin resultados y **Limpiar filtros**.
+
+## S26: useState, búsqueda reactiva y filtrado
 
 - Búsqueda por nombre y filtro por región conectados al estado de React: `query` y `region` con `useState<string>("")`, enlazados al `input` y al `select` con `value` y `onChange` (eventos tipados).
 - Los países visibles son un **resultado derivado**: `filterCountries(countriesDemo, query, region)` se recalcula en cada render desde la colección original, sin otro estado.
@@ -24,7 +31,9 @@ Los países son datos locales de demostración (`src/data/countries-demo.ts`: El
 | Átomo | `Flag` | Muestra la bandera y usa `placeholder.png` si falla o no hay URL. | `src: string`, `alt: string` |
 | Molécula | `CountryCard` | Combina `Flag`, `Badge` y los datos de un país. | `country: Country`, `onSelect: (code: string) => void` |
 | Organismo | `CountryGrid` | Recorre un `Country[]` y crea una tarjeta por país. | `countries: Country[]`, `onSelect: (code: string) => void` |
-| Organismo | `Header` | Título de la página y contenido de presentación. | `title: string`, `children: ReactNode` |
+| Molécula | `SearchBar` | Campo de búsqueda controlado con etiqueta e ícono. | `value: string`, `onChange` |
+| Molécula | `RegionFilter` | Selector de región controlado; opciones recibidas por props. | `value: string`, `regions: string[]`, `onChange` |
+| Organismo | `Header` | Título, contenido y controles de filtro; transmite props sin estado propio. | `title`, `children`, `query`, `region`, `regions`, `onQueryChange`, `onRegionChange` |
 | Organismo | `SiteHeader` | Barra superior con navegación y menú móvil (estado local `isMenuOpen`). | Sin props |
 
 ## Qué hace `CountryGrid` y qué recibe
@@ -46,7 +55,7 @@ La etiqueta visible del selector (por ejemplo, "América") es distinta del valor
 | Listado de países | Preparado para recibir cualquier `Country[]`; comprobado con datos temporales. |
 | Cabecera de navegación y menú móvil | Migrados en `SiteHeader` (estado `isMenuOpen`, `aria-expanded`, Escape y breakpoint de 768 px). Pendiente: ícono de perfil de la versión Vanilla. |
 | Pie / "Acerca de" | Migrado como `<footer id="acerca-de">`, destino del enlace del menú. |
-| Búsqueda y filtro por región combinados | Migrados con `useState` y `filterCountries`; los controles viven en `App.tsx` (su extracción a componentes se trabaja en S28). |
+| Búsqueda y filtro por región combinados | Migrados con `useState` y `filterCountries`; controles extraídos en S27 a `SearchBar` y `RegionFilter` (estado en `App`). |
 | Debounce de 300 ms | Pendiente: en esta fase el filtrado se ejecuta con cada cambio (`useState` no aplica debounce). |
 | Catálogo completo, carga, vacío, error y reintento | Pendiente: conectar mediante el módulo de datos y los efectos de React. |
 | Vista inicial de 8 países con catálogo completo para filtrar | Pendiente: distinguir entre todos los países cargados y la lista visible. |
