@@ -67,6 +67,10 @@ Nota: `key` usa `codes.alpha_2`. Al cargar el catálogo completo habrá territor
 
 ## Resultado
 
+Componentes controlados (S27): con `SearchBar` y `RegionFilter` extraídos, `can` + región América se comporta igual que en S26; el estado sigue en `App` y las regiones del selector se derivan de los datos.
+
+![Filtros con SearchBar y RegionFilter (S27)](docs/captura-s27-filtros.png)
+
 Búsqueda y filtro combinados (S26): `can` + región América devuelve solo Canada; el contador muestra "1 de 3 países" y aparece el botón "Limpiar filtros".
 
 ![Filtro aplicado: can + América (S26)](docs/captura-s26-filtro.png)
