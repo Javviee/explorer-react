@@ -4,15 +4,17 @@ Migración de **Explorer App** a React: interfaz para explorar información de p
 
 Esta es la versión React del proyecto. La versión Vanilla TypeScript se conserva como referencia de la migración: [Explorer-APP---DWA](https://github.com/Javviee/Explorer-APP---DWA) (rama `LAB-2`).
 
-## Estado actual (S25: componentes, props y composición)
+## Estado actual (S26: useState, búsqueda reactiva y filtrado)
 
-- Interfaz organizada en cinco componentes: `Badge` y `Flag` (átomos), `CountryCard` (molécula), `CountryGrid` y `Header` (organismos).
-- `App` entrega un arreglo de países a `CountryGrid`, que genera una tarjeta por país con `map()` y una `key` estable.
-- La tarjeta comunica la selección al padre con la función prop `onSelect` (por ahora solo registra el código en la consola).
-- `Header` recibe un `title` y contenido mediante `children`.
-- Diseño adaptable (la rejilla pasa de 1 a 4 columnas; cada tarjeta cambia su interior según su propio ancho), efecto hover y modo oscuro automático según la preferencia del sistema.
+- Búsqueda por nombre y filtro por región conectados al estado de React: `query` y `region` con `useState<string>("")`, enlazados al `input` y al `select` con `value` y `onChange` (eventos tipados).
+- Los países visibles son un **resultado derivado**: `filterCountries(countriesDemo, query, region)` se recalcula en cada render desde la colección original, sin otro estado.
+- Contador ("Mostrando X de Y países"), mensaje cuando no hay coincidencias y botón **Limpiar filtros** que restablece ambos estados.
+- Nuevo `SiteHeader`: barra de navegación con menú móvil controlado por estado local (`isMenuOpen`), `aria-expanded`, cierre con Escape (devuelve el foco al botón) y al cruzar los 768 px.
+- `CountryGrid` y `CountryCard` se conservan; "Ver más" sigue registrando el código del país en la consola.
 
-Los países son datos locales de demostración (`src/data/countries-demo.ts`); no se conecta la API ni se usa React Router en esta etapa.
+Desde S25: interfaz organizada con Atomic Design (`Badge`, `Flag`, `CountryCard`, `CountryGrid`, `Header`), con `onSelect` como función prop, diseño adaptable, hover y modo oscuro automático según la preferencia del sistema.
+
+Los países son datos locales de demostración (`src/data/countries-demo.ts`: El Salvador, Japan y Canada); no se conecta la API ni se usa React Router en esta etapa.
 
 ## Atomic Design en este proyecto
 
@@ -23,10 +25,17 @@ Los países son datos locales de demostración (`src/data/countries-demo.ts`); n
 | Molécula | `CountryCard` | Combina `Flag`, `Badge` y los datos de un país. | `country: Country`, `onSelect: (code: string) => void` |
 | Organismo | `CountryGrid` | Recorre un `Country[]` y crea una tarjeta por país. | `countries: Country[]`, `onSelect: (code: string) => void` |
 | Organismo | `Header` | Título de la página y contenido de presentación. | `title: string`, `children: ReactNode` |
+| Organismo | `SiteHeader` | Barra superior con navegación y menú móvil (estado local `isMenuOpen`). | Sin props |
 
 ## Qué hace `CountryGrid` y qué recibe
 
 `CountryGrid` recibe un arreglo `countries: Country[]` y la función `onSelect`. Recorre el arreglo con `map()` y, por cada país, devuelve un `CountryCard` con `key={country.codes.alpha_2}`, el objeto `country` y la misma función `onSelect`. No conoce cuántos países hay ni de dónde vienen: si recibe dos, muestra dos tarjetas; si recibe cuatro, muestra cuatro.
+
+## Cómo funciona la búsqueda reactiva
+
+Al escribir en el campo, `onChange` llama a `setQuery(event.currentTarget.value)`. Esa llamada solicita a React actualizar el estado; React vuelve a ejecutar `App` con el nuevo `query` y vuelve a dibujar el JSX. `filteredCountries` se calcula en ese mismo render con `filterCountries(countriesDemo, query, region)`: como es un valor derivado de estados que ya existen y de una colección que no cambia, no necesita su propio `useState` (guardarlo duplicaría la información y podría desincronizarse). El filtro trabaja siempre sobre la colección original, así que limpiar la búsqueda conserva la región y cambiar la región conserva el texto.
+
+La etiqueta visible del selector (por ejemplo, "América") es distinta del valor que se compara con los datos (`Americas`): se separa la presentación de la lógica.
 
 ## Seguimiento de la migración
 
@@ -35,8 +44,10 @@ Los países son datos locales de demostración (`src/data/countries-demo.ts`); n
 | Tipos, utilidades y recursos copiados | Reutilizados (`Country`, `format.ts`, `placeholder.png`); revisar contratos al conectar la fuente completa. |
 | Tarjeta, bandera y región | Organizadas como componentes. |
 | Listado de países | Preparado para recibir cualquier `Country[]`; comprobado con datos temporales. |
-| Cabecera de navegación, menú móvil y pie | Pendiente: el `Header` actual solo presenta título y contenido; falta adaptar la barra de navegación y el menú móvil (necesita estado). |
-| Búsqueda, filtro por región y debounce | Pendiente: conectar al estado y a componentes de formulario. |
+| Cabecera de navegación y menú móvil | Migrados en `SiteHeader` (estado `isMenuOpen`, `aria-expanded`, Escape y breakpoint de 768 px). Pendiente: ícono de perfil de la versión Vanilla. |
+| Pie / "Acerca de" | Migrado como `<footer id="acerca-de">`, destino del enlace del menú. |
+| Búsqueda y filtro por región combinados | Migrados con `useState` y `filterCountries`; los controles viven en `App.tsx` (su extracción a componentes se trabaja en S28). |
+| Debounce de 300 ms | Pendiente: en esta fase el filtrado se ejecuta con cada cambio (`useState` no aplica debounce). |
 | Catálogo completo, carga, vacío, error y reintento | Pendiente: conectar mediante el módulo de datos y los efectos de React. |
 | Vista inicial de 8 países con catálogo completo para filtrar | Pendiente: distinguir entre todos los países cargados y la lista visible. |
 | Detalle y navegación | Pendiente: integrar con el enrutamiento. |
@@ -47,7 +58,15 @@ Nota: `key` usa `codes.alpha_2`. Al cargar el catálogo completo habrá territor
 
 ## Resultado
 
-Pantalla actual (S25): `Header` y `CountryGrid` con tres tarjetas generadas desde el arreglo `countriesDemo`. La primera tarjeta muestra el foco al navegar con teclado.
+Búsqueda y filtro combinados (S26): `can` + región América devuelve solo Canada; el contador muestra "1 de 3 países" y aparece el botón "Limpiar filtros".
+
+![Filtro aplicado: can + América (S26)](docs/captura-s26-filtro.png)
+
+Sin coincidencias (S26): `CAN` + región Asia no devuelve países y se muestra un mensaje en lugar de una cuadrícula vacía.
+
+![Mensaje sin coincidencias: CAN + Asia (S26)](docs/captura-s26-sin-resultados.png)
+
+Pantalla de la sesión anterior (S25): `Header` y `CountryGrid` con tres tarjetas generadas desde el arreglo `countriesDemo`. La primera tarjeta muestra el foco al navegar con teclado.
 
 ![Explorer React con componentes atómicos (S25)](docs/captura-s25.png)
 
@@ -108,12 +127,14 @@ explorer-react/
     │   │   └── CountryCard.tsx
     │   └── organisms/
     │       ├── CountryGrid.tsx
-    │       └── Header.tsx
+    │       ├── Header.tsx
+    │       └── SiteHeader.tsx
     ├── data/
     │   └── countries-demo.ts  Países de demostración y arreglo countriesDemo
     ├── types/
     │   └── country.ts         Interface Country (reutilizada de la versión Vanilla)
     └── utils/
+        ├── filter.ts          filterCountries: filtra por nombre y región sin modificar el arreglo original
         └── format.ts          formatPopulation, getCapital, getFlagDescription (reutilizadas)
 ```
 

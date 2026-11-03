@@ -15,20 +15,6 @@ export const paisUno: Country = {
 }
 
 export const paisDos: Country = {
-  names: { common: 'Costa Rica' },
-  codes: { alpha_2: 'CR' },
-  capitals: [{ name: 'San José' }],
-  flag: {
-    description:
-      'The flag of Costa Rica is composed of five horizontal bands of blue, white, red, white and blue. The central red band is twice the height of the other four bands and bears the national coat of arms within a white oval offset towards the hoist side.',
-    emoji: '🇨🇷',
-    url_png: 'https://flags.restcountries.com/v5/w640/cr.png',
-  },
-  region: 'Americas',
-  population: 5160700,
-}
-
-export const paisTres: Country = {
   names: { common: 'Japan' },
   codes: { alpha_2: 'JP' },
   capitals: [{ name: 'Tokyo' }],
@@ -39,6 +25,20 @@ export const paisTres: Country = {
   },
   region: 'Asia',
   population: 122650000,
+}
+
+export const paisTres: Country = {
+  names: { common: 'Canada' },
+  codes: { alpha_2: 'CA' },
+  capitals: [{ name: 'Ottawa' }],
+  flag: {
+    description:
+      'The flag of Canada is composed of a red vertical band on the hoist and fly sides and a central white square that is twice the width of the vertical bands. A large eleven-pointed red maple leaf is centered in the white square.',
+    emoji: '🇨🇦',
+    url_png: 'https://flags.restcountries.com/v5/w640/ca.png',
+  },
+  region: 'Americas',
+  population: 41798407,
 }
 
 export const countriesDemo: Country[] = [paisUno, paisDos, paisTres]
