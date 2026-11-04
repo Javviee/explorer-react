@@ -41,4 +41,44 @@ export const paisTres: Country = {
   population: 41798407,
 }
 
-export const countriesDemo: Country[] = [paisUno, paisDos, paisTres]
+export const paisCuatro: Country = {
+  names: { common: 'Costa Rica' },
+  codes: { alpha_2: 'CR' },
+  capitals: [{ name: 'San José' }],
+  flag: {
+    description:
+      'The flag of Costa Rica features five horizontal bands of blue, white, red, white and blue, with the red band being twice as wide as the others.',
+    emoji: '🇨🇷',
+    url_png: 'https://flags.restcountries.com/v5/w640/cr.png',
+  },
+  region: 'Americas',
+  population: 5213000,
+}
+
+export const paisCinco: Country = {
+  names: { common: 'Germany' },
+  codes: { alpha_2: 'DE' },
+  capitals: [{ name: 'Berlin' }],
+  flag: {
+    description: 'The flag of Germany consists of three equal horizontal bands of black, red and gold.',
+    emoji: '🇩🇪',
+    url_png: 'https://flags.restcountries.com/v5/w640/de.png',
+  },
+  region: 'Europe',
+  population: 83280000,
+}
+
+export const paisSeis: Country = {
+  names: { common: 'France' },
+  codes: { alpha_2: 'FR' },
+  capitals: [{ name: 'Paris' }],
+  flag: {
+    description: 'The flag of France consists of three equal vertical bands of blue, white and red.',
+    emoji: '🇫🇷',
+    url_png: 'https://flags.restcountries.com/v5/w640/fr.png',
+  },
+  region: 'Europe',
+  population: 66548000,
+}
+
+export const countriesDemo: Country[] = [paisUno, paisDos, paisTres, paisCuatro, paisCinco, paisSeis]
