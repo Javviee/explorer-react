@@ -21,7 +21,7 @@ Esta es la versión React del proyecto. La versión Vanilla TypeScript se conser
 
 Desde S25: interfaz organizada con Atomic Design (`Badge`, `Flag`, `CountryCard`, `CountryGrid`, `Header`), con `onSelect` como función prop, diseño adaptable, hover y modo oscuro automático según la preferencia del sistema.
 
-Los países son datos locales de demostración (`src/data/countries-demo.ts`: El Salvador, Japan y Canada); no se conecta la API ni se usa React Router en esta etapa.
+Los países son datos locales de demostración (`src/data/countries-demo.ts`: El Salvador, Japan, Canada, Costa Rica, Germany y France); no se conecta la API ni se usa React Router en esta etapa.
 
 ## Atomic Design en este proyecto
 
@@ -71,7 +71,7 @@ Componentes controlados (S27): con `SearchBar` y `RegionFilter` extraídos, `can
 
 ![Filtros con SearchBar y RegionFilter (S27)](docs/captura-s27-filtros.png)
 
-Búsqueda y filtro combinados (S26): `can` + región América devuelve solo Canada; el contador muestra "1 de 3 países" y aparece el botón "Limpiar filtros".
+Búsqueda y filtro combinados (S26): `can` + región América devuelve solo Canada; el contador muestra "1 de 6 países" y aparece el botón "Limpiar filtros".
 
 ![Filtro aplicado: can + América (S26)](docs/captura-s26-filtro.png)
 
