@@ -4,7 +4,25 @@ Migración de **Explorer App** a React: interfaz para explorar información de p
 
 Esta es la versión React del proyecto. La versión Vanilla TypeScript se conserva como referencia de la migración: [Explorer-APP---DWA](https://github.com/Javviee/Explorer-APP---DWA) (rama `LAB-2`).
 
-## Estado actual (S29: useEffect y consumo de datos)
+## Estado actual (S30: Custom Hooks)
+
+- La lógica que vivía en `App.tsx` se extrajo a dos Custom Hooks en `src/hooks/`, sin cambiar la interfaz ni el comportamiento.
+- **`useCountries()`** encapsula la carga: estado de la petición (`AppState`), `useEffect` con `AbortController` y reintento. Devuelve `{ state, retry }` (interface `UseCountriesResult`).
+- **`useSearch(countries)`** encapsula `query`, `region`, el debounce de 300 ms, las regiones disponibles, los 8 países iniciales y el resultado filtrado. No hace `fetch`: recibe los países. Devuelve `query`, `debouncedQuery`, `region`, `regions`, `hasFilters`, `visibleCountries`, `setQuery`, `setRegion` y `clearFilters` (interface `UseSearchResult`).
+- `filterCountries()` sigue siendo una función utilitaria (no usa hooks) y los hooks la reutilizan.
+- `App.tsx` queda como punto de integración: llama a los hooks, conecta `SearchBar`, `RegionFilter`, `CountryGrid` y los estados de interfaz con sus props de siempre.
+
+Flujo: `countries.json` → `useCountries()` → `useSearch()` → `App.tsx` → `CountryGrid`.
+
+### Respuestas breves (práctica S30)
+
+1. **¿Qué permanece en `App.tsx`?** Integrar: llamar a los hooks, decidir qué estado de interfaz mostrar (carga, error, vacío o tarjetas) y conectar los componentes visuales con sus props y callbacks.
+2. **¿Por qué `filterCountries()` no es un hook?** Solo recibe datos y devuelve un resultado; no usa `useState`, `useEffect` ni otros hooks. Una función utilitaria es suficiente y se puede probar y reutilizar sin React.
+3. **¿Qué devuelve `useCountries()`?** `state`, que indica si la carga está en `loading`, `success` (con los países en `data`) o `error` (con un mensaje), y `retry`, que repite la carga incrementando el contador que es dependencia del efecto.
+4. **¿Por qué no se hace `fetch` al cambiar el texto?** Porque los países ya están guardados en el estado de `useCountries`; `useSearch` solo recalcula el filtro sobre ese arreglo durante el render.
+5. **Si dos componentes llaman a `useSearch()`, ¿comparten el texto?** No. Cada llamada crea su propia instancia de estado. Para compartirlo habría que llamarlo una sola vez y pasar los valores por props o usar otro mecanismo (por ejemplo, Context).
+
+## Estado anterior (S29: useEffect y consumo de datos)
 
 - Los países ya no son datos de demostración en el código: se cargan desde `public/data/countries.json` (254 territorios) con `fetch`, dentro de un `useEffect`. Solo se muestran 8 países destacados mientras no haya filtros; al buscar o filtrar se usa el catálogo completo.
 - Servicio tipado `src/api/countries.ts` (`fetchCountries`): comprueba `response.ok`, recibe el JSON como `unknown` y **valida** su estructura antes de devolver `Country[]`. `App` no conoce los detalles de la solicitud.
@@ -82,7 +100,7 @@ La etiqueta visible del selector (por ejemplo, "América") es distinta del valor
 | Listado de países | Recibe cualquier `Country[]`; ahora alimentado desde `countries.json`. |
 | Cabecera de navegación y menú móvil | Migrados en `SiteHeader` (estado `isMenuOpen`, `aria-expanded`, Escape y breakpoint de 768 px). Pendiente: ícono de perfil de la versión Vanilla. |
 | Pie / "Acerca de" | Migrado como `<footer id="acerca-de">`, destino del enlace del menú. |
-| Búsqueda y filtro por región combinados | Migrados con `useState` y `filterCountries`; controles extraídos en S27 a `SearchBar` y `RegionFilter` (estado en `App`). |
+| Búsqueda y filtro por región combinados | Migrados con `useState` y `filterCountries`; controles en `SearchBar` y `RegionFilter`; desde S30 el estado vive en `useSearch`. |
 | Debounce de 300 ms | Migrado en S29 con un segundo `useEffect` (`setTimeout` y `clearTimeout`). |
 | Catálogo completo, carga, vacío, error y reintento | Migrados en S29: `fetchCountries` (validado), `AppState`, skeleton, error con Reintentar y mensaje sin resultados. |
 | Vista inicial de 8 países con catálogo completo para filtrar | Migrada en S29: se carga el catálogo completo y se muestran 8 países mientras no haya filtros. |
@@ -163,7 +181,7 @@ explorer-react/
 │   └── placeholder.png        Imagen de respaldo si una bandera no carga
 └── src/
     ├── main.tsx               Monta React e importa el CSS global
-    ├── App.tsx                Dueño del estado; efectos de carga y debounce; compone la pantalla
+    ├── App.tsx                Integra los hooks y los componentes visuales
     ├── index.css              Tailwind + design tokens (@theme) + tipografía fluida
     ├── api/
     │   └── countries.ts       fetchCountries: fetch tipado, comprobación de response.ok y validación
@@ -180,6 +198,9 @@ explorer-react/
     │       ├── CountryStates.tsx   LoadingState (skeleton), ErrorState (Reintentar), EmptyState
     │       ├── Header.tsx
     │       └── SiteHeader.tsx
+    ├── hooks/
+    │   ├── useCountries.ts    Carga de países: state (AppState) y retry
+    │   └── useSearch.ts       Búsqueda, región, debounce de 300 ms y países visibles
     ├── types/
     │   └── country.ts         Interface Country (flag.url_svg)
     └── utils/

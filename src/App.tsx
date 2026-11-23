@@ -1,62 +1,28 @@
-import { useEffect, useState } from 'react'
 import type { ChangeEvent, JSX } from 'react'
-import { fetchCountries } from './api/countries'
 import { CountryGrid } from './components/organisms/CountryGrid'
 import { EmptyState, ErrorState, LoadingState } from './components/organisms/CountryStates'
 import { Header } from './components/organisms/Header'
 import { SiteHeader } from './components/organisms/SiteHeader'
+import { useCountries } from './hooks/useCountries'
+import { useSearch } from './hooks/useSearch'
 import type { Country } from './types/country'
-import type { AppState } from './utils/app-state'
-import { filterCountries } from './utils/filter'
-
-const INITIAL_VISIBLE_COUNTRIES: number = 8
-const SEARCH_DEBOUNCE_MS: number = 300
 
 export default function App(): JSX.Element {
-  const [state, setState] = useState<AppState>({ status: 'loading' })
-  const [query, setQuery] = useState<string>('')
-  const [debouncedQuery, setDebouncedQuery] = useState<string>('')
-  const [region, setRegion] = useState<string>('')
-  const [retryCount, setRetryCount] = useState<number>(0)
+  const { state, retry } = useCountries()
 
-  // Efecto 1: sincroniza el componente con la fuente de datos al montar y en cada reintento.
-  useEffect(() => {
-    const controller: AbortController = new AbortController()
-    let active: boolean = true
-
-    async function load(): Promise<void> {
-      setState({ status: 'loading' })
-
-      try {
-        const countries: Country[] = await fetchCountries(controller.signal)
-        if (active) setState({ status: 'success', data: countries })
-      } catch (error: unknown) {
-        // Una solicitud cancelada no es un error de carga: el efecto ya no está vigente.
-        if (!active || controller.signal.aborted) return
-        console.error('Error al cargar los países:', error)
-        setState({ status: 'error', message: 'Verifica tu conexión e inténtalo nuevamente.' })
-      }
-    }
-
-    void load()
-
-    // Limpieza: cancela la solicitud pendiente cuando el efecto deja de ser vigente.
-    return () => {
-      active = false
-      controller.abort()
-    }
-  }, [retryCount])
-
-  // Efecto 2: aplica la búsqueda 300 ms después de la última pulsación.
-  useEffect(() => {
-    const timer: ReturnType<typeof setTimeout> = setTimeout(() => {
-      setDebouncedQuery(query)
-    }, SEARCH_DEBOUNCE_MS)
-
-    return () => {
-      clearTimeout(timer)
-    }
-  }, [query])
+  // Mientras no haya datos exitosos, useSearch recibe un arreglo vacío válido.
+  const allCountries: Country[] = state.status === 'success' ? state.data : []
+  const {
+    query,
+    debouncedQuery,
+    region,
+    regions,
+    hasFilters,
+    visibleCountries,
+    setQuery,
+    setRegion,
+    clearFilters,
+  } = useSearch(allCountries)
 
   function handleQueryChange(event: ChangeEvent<HTMLInputElement>): void {
     setQuery(event.currentTarget.value)
@@ -66,42 +32,16 @@ export default function App(): JSX.Element {
     setRegion(event.currentTarget.value)
   }
 
-  function handleClearFilters(): void {
-    setQuery('')
-    // Se limpia también el valor con debounce para que el cambio sea inmediato.
-    setDebouncedQuery('')
-    setRegion('')
-  }
-
-  function handleRetry(): void {
-    setRetryCount((previous: number): number => previous + 1)
-  }
-
   function handleSelect(code: string): void {
     // Comprobación temporal: el detalle se conectará con el enrutamiento.
     console.log('País seleccionado:', code)
   }
 
-  const hasFilters: boolean = query.trim() !== '' || region !== ''
-  const isFiltering: boolean = debouncedQuery.trim() !== '' || region !== ''
-
-  const allCountries: Country[] = state.status === 'success' ? state.data : []
-  // Regiones derivadas de los datos cargados: sin duplicados y en orden alfabético.
-  const regions: string[] = Array.from(
-    new Set(allCountries.map((country: Country): string => country.region)),
-  ).sort()
-
-  // Resultado derivado: no necesita efecto ni estado propio.
-  const filteredCountries: Country[] = filterCountries(allCountries, debouncedQuery, region)
-  const visibleCountries: Country[] = isFiltering
-    ? filteredCountries
-    : filteredCountries.slice(0, INITIAL_VISIBLE_COUNTRIES)
-
   let content: JSX.Element
   if (state.status === 'loading') {
     content = <LoadingState />
   } else if (state.status === 'error') {
-    content = <ErrorState onRetry={handleRetry} />
+    content = <ErrorState onRetry={retry} />
   } else if (visibleCountries.length === 0) {
     content = <EmptyState query={debouncedQuery} hasRegion={region !== ''} />
   } else {
@@ -142,7 +82,7 @@ export default function App(): JSX.Element {
               {hasFilters && (
                 <button
                   type="button"
-                  onClick={handleClearFilters}
+                  onClick={clearFilters}
                   className="rounded-full border border-primary px-md py-xs text-sm font-semibold text-primary transition-all duration-150 hover:bg-primary hover:text-white active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary dark:border-text-secondary-dark dark:text-text-primary-dark dark:hover:bg-primary"
                 >
                   Limpiar filtros
