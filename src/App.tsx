@@ -19,9 +19,9 @@ export default function App(): JSX.Element {
 
       <footer
         id="acerca-de"
-        className="border-t border-border px-md py-lg text-center text-sm text-text-secondary dark:border-border-dark dark:text-text-secondary-dark"
+        className="bg-secondary px-md py-lg text-center text-sm text-white"
       >
-        <h2 className="font-display text-xl text-text-primary dark:text-text-primary-dark">Acerca de</h2>
+        <h2 className="font-display text-xl">Acerca de</h2>
         <p className="mx-auto mt-xs max-w-2xl">
           Explorer App es un proyecto académico para explorar información básica de países, migrado de
           Vanilla TypeScript a React. Datos de demostración basados en REST Countries.

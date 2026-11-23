@@ -4,7 +4,25 @@ Migración de **Explorer App** a React: interfaz para explorar información de p
 
 Esta es la versión React del proyecto. La versión Vanilla TypeScript se conserva como referencia de la migración: [Explorer-APP---DWA](https://github.com/Javviee/Explorer-APP---DWA) (rama `LAB-2`).
 
-## Estado actual (S32: React Router v6)
+## Estado actual (S33: página de detalle con `useParams`)
+
+- `CountryDetailPage` (`/country/:code`) muestra el país de la URL: lee el código con `useParams<keyof CountryRouteParams>()` y lo entrega al hook `useCountryDetail`.
+- **`useCountryDetail(code)`** consulta con `fetchCountryByCode`, gestiona `loading`, `error` y `success` (unión discriminada `CountryDetailState`), permite **Reintentar** y descarta respuestas anteriores con una marca `active`. El efecto depende del código y de un contador de reintentos.
+- **`fetchCountryByCode`** (`src/api/countries.ts`) busca por `alpha_2` sobre una carga compartida del JSON: las fronteras no vuelven a descargar el archivo. Si falla, la siguiente consulta lo reintenta. Los campos opcionales del detalle (`tlds`, `currencies`, `languages`, `borders`, `subregion`) se validan cuando están presentes.
+- **Fronteras:** el texto del enlace conserva las tres letras (por ejemplo `GTM`), pero el destino usa dos (`/country/GT`) mediante `getCountryRouteCode` (`src/utils/country-codes.ts`, 165 equivalencias comprobadas contra el JSON).
+- Composición: botón «← Atrás» (`Link` a `/`), bandera grande a la izquierda y datos en dos columnas a la derecha en escritorio; en móvil, todo en vertical. Los datos opcionales muestran «No disponible» y un país sin fronteras muestra «Sin fronteras terrestres».
+- Colores del proyecto: el botón «Atrás» usa el color de acento, las fronteras son botones claros (superficie) y el pie pasó a ser una franja azul (`secondary`) en todas las páginas.
+- `Flag` acepta una `className` opcional para reutilizar la imagen con su respaldo (`placeholder.png`) en el detalle.
+
+### Respuestas breves (autoevaluación S33)
+
+1. **`useParams` y `fetchCountryByCode`:** `useParams` obtiene el valor del segmento `:code` de la URL (como `string | undefined`); no sabe si existe el país. `fetchCountryByCode` recibe ese código y devuelve el objeto `CountryDetail` correspondiente (o lanza un error si no existe).
+2. **¿Por qué el efecto depende del código?** Al pasar de `/country/AF` a `/country/IR` React reutiliza la misma página; si el efecto no dependiera del código no consultaría el nuevo país.
+3. **¿Qué evita `active` y qué no cancela?** Evita que una respuesta anterior reemplace el país actual (cada ejecución tiene su propia marca y el cleanup la pone en `false`). No cancela la solicitud ni la descarga compartida del JSON.
+4. **`GTM` frente a `GT`:** son dos formas de identificar Guatemala. Los datos de fronteras usan tres letras, pero la consulta y la ruta usan dos, así que se muestra `GTM` y el destino es `/country/GT`.
+5. **Responsabilidades:** el hook concentra la consulta y sus estados; la página lee la URL (`useParams`) y presenta el resultado según `status`.
+
+## Estado anterior (S32: React Router v6)
 
 - Navegación SPA con **React Router v6** (`react-router-dom`): `BrowserRouter` se configura una sola vez en `src/main.tsx`.
 - Rutas definidas en `App.tsx` con `Routes` y `Route`:
@@ -124,7 +142,7 @@ La etiqueta visible del selector (por ejemplo, "América") es distinta del valor
 | Debounce de 300 ms | Migrado en S29 con un segundo `useEffect` (`setTimeout` y `clearTimeout`). |
 | Catálogo completo, carga, vacío, error y reintento | Migrados en S29: `fetchCountries` (validado), `AppState`, skeleton, error con Reintentar y mensaje sin resultados. |
 | Vista inicial de 8 países con catálogo completo para filtrar | Migrada en S29: se carga el catálogo completo y se muestran 8 países mientras no haya filtros. |
-| Detalle y navegación | Navegación migrada en S32 (React Router v6, `/` y `/country/:code`); página de detalle inicial. Pendiente: consulta y presentación completa del detalle. |
+| Detalle y navegación | Migrados en S32 y S33: rutas `/` y `/country/:code`, detalle con `useCountryDetail`, fronteras navegables y estados de carga y error. |
 | Tema claro/oscuro | Solo por preferencia del sistema (la versión Vanilla tampoco tenía interruptor). |
 | Apariencia equivalente a la versión Vanilla | Pendiente: comparar colores, formas y componentes al terminar la migración. |
 
@@ -204,7 +222,7 @@ explorer-react/
     ├── App.tsx                Cabecera y pie comunes y definición de rutas (Routes y Route)
     ├── index.css              Tailwind + design tokens (@theme) + tipografía fluida
     ├── api/
-    │   └── countries.ts       fetchCountries: fetch tipado, comprobación de response.ok y validación
+    │   └── countries.ts       fetchCountries y fetchCountryByCode: fetch tipado, response.ok y validación
     ├── components/
     │   ├── atoms/
     │   │   ├── Badge.tsx
@@ -220,14 +238,17 @@ explorer-react/
     │       └── SiteHeader.tsx
     ├── pages/
     │   ├── HomePage.tsx       Ruta /: integra los hooks, el buscador, el filtro y el listado
-    │   ├── CountryDetailPage.tsx   Ruta /country/:code (inicial: muestra el código)
+    │   ├── CountryDetailPage.tsx   Ruta /country/:code: detalle del país (usa useCountryDetail)
     │   └── NotFoundPage.tsx   Ruta * para direcciones inexistentes
     ├── hooks/
     │   ├── useCountries.ts    Carga de países: state (AppState) y retry
+    │   ├── useCountryDetail.ts  Consulta del detalle por código: state y retry
     │   └── useSearch.ts       Búsqueda, región, debounce de 300 ms y países visibles
     ├── types/
-    │   └── country.ts         Interface Country (flag.url_svg)
+    │   ├── country.ts         Interface Country (flag.url_svg)
+    │   └── country-detail.ts  CountryDetail: campos opcionales del detalle
     └── utils/
+        ├── country-codes.ts   getCountryRouteCode: fronteras de 3 letras a código de ruta de 2
         ├── app-state.ts       AppState: loading | success | error
         ├── filter.ts          filterCountries: filtra por nombre y región sin modificar el arreglo original
         └── format.ts          formatPopulation, getCapital, getFlagDescription (reutilizadas)
