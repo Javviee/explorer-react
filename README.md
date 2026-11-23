@@ -4,7 +4,27 @@ Migración de **Explorer App** a React: interfaz para explorar información de p
 
 Esta es la versión React del proyecto. La versión Vanilla TypeScript se conserva como referencia de la migración: [Explorer-APP---DWA](https://github.com/Javviee/Explorer-APP---DWA) (rama `LAB-2`).
 
-## Estado actual (S30: Custom Hooks)
+## Estado actual (S32: React Router v6)
+
+- Navegación SPA con **React Router v6** (`react-router-dom`): `BrowserRouter` se configura una sola vez en `src/main.tsx`.
+- Rutas definidas en `App.tsx` con `Routes` y `Route`:
+  - `/` → `HomePage` (búsqueda, filtro por región y listado; usa `useCountries` y `useSearch`).
+  - `/country/:code` → `CountryDetailPage` (página inicial: muestra el código recibido con `useParams`; el detalle completo se desarrolla en la siguiente sesión).
+  - `*` → `NotFoundPage` para direcciones inexistentes.
+- "Ver más" navega con `useNavigate()` a `/country/<código>` (el `alpha_2` de `Country`), sin recargar el documento; "Volver al listado" usa `Link`.
+- `SiteHeader` usa `Link`/`NavLink`: la marca e "Inicio" llevan a `/` (con `aria-current` automático) y "Explorar países" a `/#paises`; "Acerca de" sigue siendo un ancla al pie, que está en todas las páginas.
+- Los cuatro territorios sin código `alpha_2` tienen el botón "Ver más" deshabilitado, porque no tienen una URL de detalle válida.
+- La estructura común (cabecera y pie) vive en `App.tsx`; cada página solo aporta su `<main>`.
+
+### Qué pasa con la búsqueda al volver al listado
+
+`HomePage` se desmonta al ir al detalle y se monta de nuevo al volver, así que `useSearch` crea un estado nuevo: la búsqueda y la región **no se conservan**. Extraer la lógica a un Custom Hook no comparte ni conserva el estado entre páginas. Para conservarlo habría que subirlo a un componente que permanezca montado, a un contexto o a la URL (por ejemplo, parámetros de búsqueda).
+
+### Router frente al hash routing de la versión Vanilla
+
+En Vanilla se escuchaba `hashchange` y se leía `location.hash` a mano (`#/country/SV`). Con React Router cada ruta se declara con `Route`, la URL es una ruta real (`/country/SV`) y los parámetros se leen con `useParams`. Al ser rutas reales, el servidor que publique la app debe devolver `index.html` para cualquier ruta (en Vercel, una regla de *rewrite*), o recargar `/country/SV` daría 404.
+
+## Estado anterior (S30: Custom Hooks)
 
 - La lógica que vivía en `App.tsx` se extrajo a dos Custom Hooks en `src/hooks/`, sin cambiar la interfaz ni el comportamiento.
 - **`useCountries()`** encapsula la carga: estado de la petición (`AppState`), `useEffect` con `AbortController` y reintento. Devuelve `{ state, retry }` (interface `UseCountriesResult`).
@@ -65,7 +85,7 @@ Secuencia: render inicial (`loading`) → `useEffect` → `fetchCountries` → r
 
 Desde S25: interfaz organizada con Atomic Design (`Badge`, `Flag`, `CountryCard`, `CountryGrid`, `Header`), con `onSelect` como función prop, diseño adaptable, hover y modo oscuro automático según la preferencia del sistema.
 
-Desde S29 los países se leen del archivo local `public/data/countries.json` (derivado de REST Countries); no se usa ninguna API de pago ni React Router en esta etapa.
+Desde S29 los países se leen del archivo local `public/data/countries.json` (derivado de REST Countries); no se usa ninguna API de pago.
 
 ## Atomic Design en este proyecto
 
@@ -98,13 +118,13 @@ La etiqueta visible del selector (por ejemplo, "América") es distinta del valor
 | Tipos, utilidades y recursos copiados | Reutilizados (`Country`, `format.ts`, `placeholder.png`); revisar contratos al conectar la fuente completa. |
 | Tarjeta, bandera y región | Organizadas como componentes. |
 | Listado de países | Recibe cualquier `Country[]`; ahora alimentado desde `countries.json`. |
-| Cabecera de navegación y menú móvil | Migrados en `SiteHeader` (estado `isMenuOpen`, `aria-expanded`, Escape y breakpoint de 768 px). Pendiente: ícono de perfil de la versión Vanilla. |
+| Cabecera de navegación y menú móvil | Migrados en `SiteHeader` (enlaces con `Link`/`NavLink` desde S32) (estado `isMenuOpen`, `aria-expanded`, Escape y breakpoint de 768 px). Pendiente: ícono de perfil de la versión Vanilla. |
 | Pie / "Acerca de" | Migrado como `<footer id="acerca-de">`, destino del enlace del menú. |
 | Búsqueda y filtro por región combinados | Migrados con `useState` y `filterCountries`; controles en `SearchBar` y `RegionFilter`; desde S30 el estado vive en `useSearch`. |
 | Debounce de 300 ms | Migrado en S29 con un segundo `useEffect` (`setTimeout` y `clearTimeout`). |
 | Catálogo completo, carga, vacío, error y reintento | Migrados en S29: `fetchCountries` (validado), `AppState`, skeleton, error con Reintentar y mensaje sin resultados. |
 | Vista inicial de 8 países con catálogo completo para filtrar | Migrada en S29: se carga el catálogo completo y se muestran 8 países mientras no haya filtros. |
-| Detalle y navegación | Pendiente: integrar con el enrutamiento. |
+| Detalle y navegación | Navegación migrada en S32 (React Router v6, `/` y `/country/:code`); página de detalle inicial. Pendiente: consulta y presentación completa del detalle. |
 | Tema claro/oscuro | Solo por preferencia del sistema (la versión Vanilla tampoco tenía interruptor). |
 | Apariencia equivalente a la versión Vanilla | Pendiente: comparar colores, formas y componentes al terminar la migración. |
 
@@ -140,7 +160,7 @@ Capturas de la sesión anterior (S24), antes de reorganizar los componentes:
 
 ## Stack
 
-- [React 18](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/)
+- [React 18](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/) + [React Router v6](https://reactrouter.com/)
 - [Vite](https://vite.dev/)
 - [Tailwind CSS v4](https://tailwindcss.com/) (`@tailwindcss/vite`), design tokens con `@theme`
 - pnpm
@@ -181,7 +201,7 @@ explorer-react/
 │   └── placeholder.png        Imagen de respaldo si una bandera no carga
 └── src/
     ├── main.tsx               Monta React e importa el CSS global
-    ├── App.tsx                Integra los hooks y los componentes visuales
+    ├── App.tsx                Cabecera y pie comunes y definición de rutas (Routes y Route)
     ├── index.css              Tailwind + design tokens (@theme) + tipografía fluida
     ├── api/
     │   └── countries.ts       fetchCountries: fetch tipado, comprobación de response.ok y validación
@@ -198,6 +218,10 @@ explorer-react/
     │       ├── CountryStates.tsx   LoadingState (skeleton), ErrorState (Reintentar), EmptyState
     │       ├── Header.tsx
     │       └── SiteHeader.tsx
+    ├── pages/
+    │   ├── HomePage.tsx       Ruta /: integra los hooks, el buscador, el filtro y el listado
+    │   ├── CountryDetailPage.tsx   Ruta /country/:code (inicial: muestra el código)
+    │   └── NotFoundPage.tsx   Ruta * para direcciones inexistentes
     ├── hooks/
     │   ├── useCountries.ts    Carga de países: state (AppState) y retry
     │   └── useSearch.ts       Búsqueda, región, debounce de 300 ms y países visibles

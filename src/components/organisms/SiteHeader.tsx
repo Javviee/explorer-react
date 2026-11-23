@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { JSX } from 'react'
+import { Link, NavLink } from 'react-router-dom'
 
 export function SiteHeader(): JSX.Element {
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false)
@@ -49,13 +50,13 @@ export function SiteHeader(): JSX.Element {
     <header className="bg-primary text-white">
       <div className="mx-auto max-w-6xl px-md py-md sm:px-lg">
         <div className="flex items-center justify-between gap-md">
-          <a
-            href="#inicio"
+          <Link
+            to="/"
             onClick={handleCloseMenu}
             className="font-display text-3xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white sm:text-4xl lg:text-5xl"
           >
             Explorer App
-          </a>
+          </Link>
 
           <button
             ref={menuButtonRef}
@@ -94,23 +95,25 @@ export function SiteHeader(): JSX.Element {
         >
           <ul className="flex flex-col gap-xs md:flex-row md:items-center md:gap-md">
             <li>
-              <a
-                href="#inicio"
+              <NavLink
+                to="/"
+                end
                 onClick={handleCloseMenu}
-                aria-current="page"
-                className="block rounded-md px-sm py-xs font-semibold transition-colors hover:bg-white/15 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                className={({ isActive }: { isActive: boolean }): string =>
+                  `block rounded-md px-sm py-xs font-semibold transition-colors hover:bg-white/15 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white ${isActive ? '' : 'text-white/85 hover:text-white'}`
+                }
               >
                 Inicio
-              </a>
+              </NavLink>
             </li>
             <li>
-              <a
-                href="#paises"
+              <Link
+                to="/#paises"
                 onClick={handleCloseMenu}
                 className="block rounded-md px-sm py-xs font-semibold text-white/85 transition-colors hover:bg-white/15 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
               >
                 Explorar países
-              </a>
+              </Link>
             </li>
             <li>
               <a

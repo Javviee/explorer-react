@@ -33,8 +33,10 @@ export function CountryCard({ country, onSelect }: CountryCardProps): JSX.Elemen
           <button
             type="button"
             aria-label={`Ver más información de ${country.names.common}`}
+            // Sin código no existe una URL /country/:code válida: el botón se deshabilita.
+            disabled={country.codes.alpha_2 === ''}
             onClick={() => onSelect(country.codes.alpha_2)}
-            className="mt-sm flex min-h-11 w-full items-center justify-center rounded-full bg-primary font-semibold text-white transition-all duration-200 hover:bg-primary/90 active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+            className="mt-sm flex min-h-11 w-full items-center justify-center rounded-full bg-primary font-semibold text-white transition-all duration-200 hover:bg-primary/90 active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-primary disabled:active:scale-100"
           >
             Ver más
           </button>
