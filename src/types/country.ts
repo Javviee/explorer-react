@@ -3,9 +3,8 @@ export interface CountryName {
 }
 
 export interface CountryFlag {
-  emoji: string
   description: string
-  url_png: string
+  url_svg: string
 }
 
 export interface CountryCapital {

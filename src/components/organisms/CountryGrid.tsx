@@ -15,7 +15,7 @@ export function CountryGrid({ countries, onSelect }: CountryGridProps): JSX.Elem
     >
       {countries.map(
         (country: Country): JSX.Element => (
-          <CountryCard key={country.codes.alpha_2} country={country} onSelect={onSelect} />
+          <CountryCard key={country.codes.alpha_2 || country.names.common} country={country} onSelect={onSelect} />
         ),
       )}
     </section>
