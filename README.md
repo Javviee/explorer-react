@@ -150,6 +150,18 @@ Nota: el catálogo incluye cuatro territorios sin `alpha_2` (Abkhazia, Northern 
 
 ## Resultado
 
+Detalle del país (S33), escritorio: `/country/AF` muestra el botón «← Atrás», la bandera a la izquierda, los datos en dos columnas y las fronteras como enlaces.
+
+![Detalle de Afghanistan en escritorio (S33)](docs/captura-s33-escritorio.png)
+
+Detalle del país (S33), móvil: la bandera pasa sobre la información y los datos se apilan en una columna.
+
+![Detalle de Afghanistan en móvil (S33)](docs/captura-s33-movil.png)
+
+Navegación por fronteras (S33): desde Afghanistan, el enlace **IRN** lleva a `/country/IR` (Iran) sin recargar la página; el texto conserva las tres letras y el destino usa el código de dos (`GTM` → `/country/GT`).
+
+![Frontera IRN en el detalle de Afghanistan (S33)](docs/captura-s33-frontera.png)
+
 Carga de datos con `useEffect` (S29): el catálogo se lee de `public/data/countries.json` (254 países). La captura muestra la búsqueda `el` combinada con la región América: "Mostrando 5 de 254 países" y el botón "Limpiar filtros". Sin filtros se muestran 8 países destacados.
 
 ![Países cargados desde countries.json con búsqueda y filtro (S29)](docs/captura-s29.png)
