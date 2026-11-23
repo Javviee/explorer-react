@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { fetchCountryByCode } from '../api/countries'
 import type { CountryDetail } from '../types/country-detail'
 
-export type CountryDetailState =
+type CountryDetailState =
   | { status: 'loading' }
   | { status: 'error'; message: string }
   | { status: 'success'; data: CountryDetail }

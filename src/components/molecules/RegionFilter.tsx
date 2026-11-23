@@ -1,19 +1,10 @@
 import type { ChangeEvent, JSX } from 'react'
+import { getRegionLabel } from '../../utils/regions'
 
 interface RegionFilterProps {
   value: string
   regions: string[]
   onChange: (event: ChangeEvent<HTMLSelectElement>) => void
-}
-
-// Etiqueta visible en español; el valor que se compara con los datos sigue siendo el de la API.
-const REGION_LABELS: Record<string, string> = {
-  Africa: 'África',
-  Americas: 'América',
-  Asia: 'Asia',
-  Europe: 'Europa',
-  Oceania: 'Oceanía',
-  Antarctic: 'Antártida',
 }
 
 export function RegionFilter({ value, regions, onChange }: RegionFilterProps): JSX.Element {
@@ -35,7 +26,7 @@ export function RegionFilter({ value, regions, onChange }: RegionFilterProps): J
         <option value="">Todas las regiones</option>
         {regions.map((region: string): JSX.Element => (
           <option key={region} value={region}>
-            {REGION_LABELS[region] ?? region}
+            {getRegionLabel(region)}
           </option>
         ))}
       </select>
