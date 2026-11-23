@@ -1,17 +1,17 @@
-export interface CountryName {
+interface CountryName {
   common: string
 }
 
-export interface CountryFlag {
+interface CountryFlag {
   description: string
   url_svg: string
 }
 
-export interface CountryCapital {
+interface CountryCapital {
   name: string
 }
 
-export interface CountryCodes {
+interface CountryCodes {
   alpha_2: string
 }
 

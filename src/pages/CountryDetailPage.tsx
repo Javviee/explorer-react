@@ -10,6 +10,7 @@ import type {
 } from '../types/country-detail'
 import { getCountryRouteCode } from '../utils/country-codes'
 import { formatPopulation, getCapital, getFlagDescription } from '../utils/format'
+import { getRegionLabel } from '../utils/regions'
 
 interface CountryRouteParams {
   code: string
@@ -65,7 +66,7 @@ function CountryDetailContent({ country }: CountryDetailContentProps): JSX.Eleme
           <dl className="space-y-2">
             <DataItem label="Nombre nativo" value={nativeName} />
             <DataItem label="Población" value={formatPopulation(country.population)} />
-            <DataItem label="Región" value={country.region} />
+            <DataItem label="Región" value={getRegionLabel(country.region)} />
             <DataItem label="Subregión" value={country.subregion || NOT_AVAILABLE} />
             <DataItem label="Capital" value={getCapital(country)} />
           </dl>
